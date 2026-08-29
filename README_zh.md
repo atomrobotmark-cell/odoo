@@ -108,13 +108,39 @@ docker restart odoo
 
 ### 构建
 
+> **一句话版** —— 用自带的构建脚本，它会自动克隆 WAHA、覆盖我们的定制文件并构建：
+>
+> ```bash
+> cd waha-docker
+> chmod +x build.sh waha_run.sh
+> PROXY=http://<proxy_host>:<proxy_port> ./build.sh
+> ```
+
+`waha-docker/` 是一个**定制构建覆盖层**，并非完整的 WAHA fork。它包含我们修改的 4 个文件：
+
+```
+waha-docker/
+├── Dockerfile          # 定制构建（GOWS 引擎、TUNA apt 镜像、移除 libsignal/ffmpeg）
+├── package.json        # WAHA 依赖（为 GOWS 移除 libsignal）
+├── waha.config.json    # 固定 gows-plus 与 dashboard 的版本/提交
+├── waha_run.sh         # 启动脚本（起容器 + 创建 default gows 会话）
+├── build.sh            # 一键 克隆 → 覆盖 → 构建 助手
+└── .dockerignore       # 保持构建上下文干净
+```
+
+其余构建上下文文件（`yarn.lock`、`.yarnrc.yml`、`entrypoint.sh`、`scripts/`、`dist/`）由**官方 WAHA 源码克隆**提供 —— `build.sh` 会自动拉取它们。
+
+**手动构建**（等价于 `build.sh` 做的事）：
+
 ```bash
 # 克隆 WAHA 源码
 git clone https://github.com/devlikeapro/waha.git waha-src
 cd waha-src
 
-# 复制我们定制的 Dockerfile（替换原始文件）
+# 覆盖我们的定制文件（替换原始文件）
 cp <path-to>/waha-docker/Dockerfile .
+cp <path-to>/waha-docker/package.json .
+cp <path-to>/waha-docker/waha.config.json .
 
 # 使用 GOWS 引擎构建（无 Chromium）
 docker build \
@@ -135,6 +161,8 @@ docker build \
   --build-arg WHATSAPP_DEFAULT_ENGINE=gows \
   -t waha-gows:local .
 ```
+
+> **注意：** Dockerfile 中还硬编码了 `git config --global http.proxy` 为 `http://192.168.140.175:10809`（我们构建环境使用的代理）。如果在不同网络下构建，请修改 Dockerfile 中的该行，或设 `PROXY=` 后自行调整再构建。
 
 **⚠️ 不要使用国内 npm 镜像（npmmirror）** —— 它们缺少 `@wppconnect/wa-version` 等包，会导致 Yarn 报 404 错误。请通过代理使用官方 npm 源。
 

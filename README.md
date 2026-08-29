@@ -108,13 +108,39 @@ The official WAHA image includes Chromium for the WEBJS engine, which we don't n
 
 ### Build
 
+> **TL;DR** — use the included helper. It clones WAHA, overlays all our custom files, and builds in one step:
+>
+> ```bash
+> cd waha-docker
+> chmod +x build.sh waha_run.sh
+> PROXY=http://<proxy_host>:<proxy_port> ./build.sh
+> ```
+
+The `waha-docker/` folder is a **custom build overlay**, not a full WAHA fork. It contains our 4 modified files:
+
+```
+waha-docker/
+├── Dockerfile          # Custom build (GOWS engine, TUNA apt mirror, no libsignal/ffmpeg)
+├── package.json        # WAHA deps (libsignal removed for GOWS)
+├── waha.config.json    # Pins gows-plus + dashboard refs
+├── waha_run.sh         # Launch script (starts container + creates default gows session)
+├── build.sh            # One-shot clone → overlay → build helper
+└── .dockerignore       # Keeps the build context clean
+```
+
+The remaining build-context files (`yarn.lock`, `.yarnrc.yml`, `entrypoint.sh`, `scripts/`, `dist/`) are provided by the **official WAHA source clone** — `build.sh` fetches them automatically.
+
+**Manual build** (equivalent to what `build.sh` does):
+
 ```bash
 # Clone WAHA source
 git clone https://github.com/devlikeapro/waha.git waha-src
 cd waha-src
 
-# Copy our custom Dockerfile (replaces the original)
+# Overlay our custom files (replace originals)
 cp <path-to>/waha-docker/Dockerfile .
+cp <path-to>/waha-docker/package.json .
+cp <path-to>/waha-docker/waha.config.json .
 
 # Build with GOWS engine (no Chromium)
 docker build \
@@ -135,6 +161,8 @@ docker build \
   --build-arg WHATSAPP_DEFAULT_ENGINE=gows \
   -t waha-gows:local .
 ```
+
+> **Note:** the Dockerfile also hardcodes `git config --global http.proxy` to `http://192.168.140.175:10809` (the proxy used in our build environment). If you build on a different network, edit that line in `Dockerfile` or set `PROXY=` and adjust before building.
 
 **⚠️ Do NOT use China npm mirrors (npmmirror)** — they are missing packages like `@wppconnect/wa-version`, causing Yarn to fail with 404 errors. Use the official npm registry via proxy instead.
 

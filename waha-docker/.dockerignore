@@ -1,0 +1,12 @@
+# Build-context exclusions for the WAHA Docker image.
+# These keep the `docker build` context small and avoid copying
+# local build artifacts / VCS metadata into the image.
+
+node_modules
+dist
+.git
+.gitignore
+*.log
+.DS_Store
+Thumbs.db
+*.md
