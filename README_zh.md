@@ -2,7 +2,7 @@
 
 本仓库包含为 Odoo 19 社区版开发的自定义模块及 Docker 构建配置，由 ATOMROBOT（天津辰星技术股份有限公司）开发。
 
-> English version: [README.md](./README.md)
+> English version: [README.md](./README.md) · 踩坑记录：[PITFALLS.md](./PITFALLS.md)
 
 ## 仓库结构
 
