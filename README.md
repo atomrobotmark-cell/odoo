@@ -2,6 +2,8 @@
 
 Custom modules and Docker build configuration for Odoo 19 Community, developed for ATOMROBOT (Tianjin Chenxing Technology Co., Ltd.).
 
+> 中文说明：[README_zh.md](./README_zh.md)
+
 ## Repository Structure
 
 ```
