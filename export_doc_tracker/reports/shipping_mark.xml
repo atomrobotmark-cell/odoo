@@ -1,0 +1,36 @@
+<odoo>
+  <!-- 用 web.basic_layout：内部走 report_layout，自带 <!DOCTYPE html> + <meta charset> + 中文字体资产，
+       且不带发货人公司信头（external_layout_bubble 的信头来自公司自定义布局，basic_layout 不含）。 -->
+  <template id="report_shipping_mark">
+    <t t-call="web.basic_layout">
+      <t t-foreach="docs" t-as="o">
+        <div class="page">
+          <div style="border:2px solid #000;padding:50px;margin-top:50px">
+            <div style="font-size:22px;font-weight:bold;text-align:center">
+              <t t-if="o.shipping_mark">
+                <div style="white-space:pre-line"><t t-esc="o.shipping_mark"/></div>
+              </t>
+              <t t-else="">
+                <div><t t-esc="(o.shipping_mark_project or '') + '-' + (o.customs_dest_country or o.partner_id.country_id.name or '') + '-' + (o.shipping_mark_code or '')"/></div>
+                <div>INVOICE NO.: <t t-esc="o.invoice_no or ''"/></div>
+                <div>C/NO. 1-UP</div>
+                <div>MADE IN CHINA</div>
+              </t>
+            </div>
+          </div>
+        </div>
+      </t>
+    </t>
+  </template>
+
+  <record id="action_report_shipping_mark" model="ir.actions.report">
+    <field name="name">唛头 Shipping Mark</field>
+    <field name="model">sale.order</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">export_doc_tracker.report_shipping_mark</field>
+    <field name="report_file">export_doc_tracker.report_shipping_mark</field>
+    <field name="print_report_name">'MARK_%s' % (object.name or '')</field>
+    <field name="binding_model_id" ref="sale.model_sale_order"/>
+    <field name="binding_type">report</field>
+  </record>
+</odoo>

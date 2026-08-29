@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_waha_account_list" model="ir.ui.view">
+        <field name="name">waha.account.list</field>
+        <field name="model">waha.account</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="base_url"/>
+                <field name="session"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_waha_account_form" model="ir.ui.view">
+        <field name="name">waha.account.form</field>
+        <field name="model">waha.account</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_test_connection" type="object"
+                            string="Test Connection" class="btn-secondary"/>
+                    <button name="action_sync_all" type="object"
+                            string="Sync All Chats" class="btn-secondary"/>
+                </header>
+                <group>
+                    <field name="name"/>
+                    <field name="base_url"/>
+                    <field name="api_key" password="true"/>
+                    <field name="session"/>
+                    <field name="active"/>
+                    <field name="company_id" invisible="1"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_waha_account" model="ir.actions.act_window">
+        <field name="name">WAHA Accounts</field>
+        <field name="res_model">waha.account</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_waha_template_list" model="ir.ui.view">
+        <field name="name">waha.template.list</field>
+        <field name="model">waha.template</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="body"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_waha_template_form" model="ir.ui.view">
+        <field name="name">waha.template.form</field>
+        <field name="model">waha.template</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="name"/>
+                    <field name="active"/>
+                </group>
+                <field name="body" widget="text"/>
+                <div class="text-muted">
+                    Variables: {{partner_id.name}}, {{name}}, {{amount_total}},
+                    {{invoice_date}}, {{partner_id.email}} ...
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_waha_template" model="ir.actions.act_window">
+        <field name="name">WhatsApp Templates</field>
+        <field name="res_model">waha.template</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_waha_message_list" model="ir.ui.view">
+        <field name="name">waha.message.list</field>
+        <field name="model">waha.message</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="create_date"/>
+                <field name="account_id"/>
+                <field name="partner_id"/>
+                <field name="phone"/>
+                <field name="model"/>
+                <field name="state"/>
+                <field name="body"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_waha_message" model="ir.actions.act_window">
+        <field name="name">WhatsApp Messages</field>
+        <field name="res_model">waha.message</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <menuitem id="menu_waha_root" name="WhatsApp" sequence="100"/>
+    <menuitem id="menu_waha_accounts" name="WAHA Accounts"
+              parent="menu_waha_root" action="action_waha_account" sequence="10"/>
+    <menuitem id="menu_waha_templates" name="Templates"
+              parent="menu_waha_root" action="action_waha_template" sequence="20"/>
+    <menuitem id="menu_waha_messages" name="Message Log"
+              parent="menu_waha_root" action="action_waha_message" sequence="30"/>
+</odoo>

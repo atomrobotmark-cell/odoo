@@ -1,0 +1,130 @@
+<odoo>
+  <record id="view_order_form_export_doc_button" model="ir.ui.view">
+    <field name="name">sale.order.form.export.doc.button</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_order_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//div[@name='button_box']" position="inside">
+        <button name="action_open_fill_wizard" type="object"
+                string="填制单证" class="oe_stat_button"
+                icon="fa-file-text-o"/>
+      </xpath>
+    </field>
+  </record>
+
+  <record id="view_order_form_export_doc" model="ir.ui.view">
+    <field name="name">sale.order.form.export.doc</field>
+    <field name="model">sale.order</field>
+    <field name="inherit_id" ref="sale.view_order_form"/>
+    <field name="arch" type="xml">
+      <xpath expr="//notebook" position="inside">
+        <page name="export_doc" string="出口单证">
+          <!-- 交单追踪 -->
+          <group>
+            <group>
+              <field name="doc_submit_method"/>
+              <field name="doc_submit_stage" widget="statusbar"
+                     statusbar_visible="none,preparing,ready,submitted"/>
+              <field name="doc_submit_date"/>
+            </group>
+            <group>
+              <field name="doc_submit_note" placeholder="交单银行/单号/备注"/>
+            </group>
+          </group>
+
+          <!-- 需制备的单证 -->
+          <group string="需制备的单证（勾选）" colspan="4">
+            <field name="doc_commercial_invoice"/>
+            <field name="doc_packing_list"/>
+            <field name="doc_bill_of_lading"/>
+            <field name="doc_cert_origin"/>
+            <field name="doc_insurance"/>
+            <field name="doc_customs_draft"/>
+            <field name="doc_shipping_mark"/>
+          </group>
+
+          <!-- 共用信息（填一次，各单据共用） -->
+          <group string="共用信息（填一次，各单据共用）" colspan="4">
+            <field name="partner_id" readonly="1"/>
+            <field name="invoice_no" readonly="1"/>
+            <field name="customs_contract_no"/>
+            <field name="incoterm_id"/>
+            <field name="customs_trans_mode"/>
+            <field name="customs_trade_mode"/>
+            <field name="customs_dest_country"/>
+            <field name="customs_port"/>
+            <field name="customs_package_type"/>
+          </group>
+
+          <!-- 各单据独立子表单 -->
+          <notebook>
+            <page string="商业发票">
+              <p>发票内容由销售订单行自动生成（卖方 / 买方 / 品名 / 数量 / 单价 / 金额）。
+                 如需调整，改上方「共用信息」或订单行即可。</p>
+              <button name="action_preview_invoice" type="object"
+                      string="预览商业发票" class="oe_highlight"/>
+            </page>
+            <page string="装箱单">
+              <group>
+                <field name="pl_total_packages"/>
+                <field name="pl_gross_weight"/>
+                <field name="pl_net_weight"/>
+                <field name="pl_volume"/>
+                <field name="customs_package_type"/>
+              </group>
+              <button name="action_preview_packing" type="object"
+                      string="预览装箱单" class="oe_highlight"/>
+            </page>
+            <page string="报关草单">
+              <group>
+                <field name="customs_prelim_no"/>
+                <field name="customs_no"/>
+                <field name="customs_export_port"/>
+                <field name="customs_filing_no"/>
+                <field name="customs_export_date"/>
+                <field name="customs_declaration_date"/>
+                <field name="customs_consignor"/>
+                <field name="customs_conveyance"/>
+                <field name="customs_bl_no"/>
+                <field name="customs_levy_nature"/>
+                <field name="customs_settlement"/>
+                <field name="customs_license_no"/>
+                <field name="customs_domestic_source"/>
+                <field name="customs_approval_no"/>
+                <field name="customs_freight"/>
+                <field name="customs_insurance"/>
+                <field name="customs_extras"/>
+                <field name="customs_container_no"/>
+                <field name="customs_attached_docs"/>
+                <field name="customs_manufacturer"/>
+              </group>
+              <group string="标记唛码及备注" colspan="4">
+                <field name="customs_marks_remark" nolabel="1"/>
+              </group>
+              <button name="action_preview_customs" type="object"
+                      string="预览报关草单" class="oe_highlight"/>
+            </page>
+            <page string="唛头">
+              <group>
+                <field name="shipping_mark_project" placeholder="项目代号（打印唛头时填写）"/>
+                <field name="shipping_mark_code" readonly="1"/>
+                <field name="shipping_mark" placeholder="留空则按默认模板生成：项目代号-国家-随机6位"
+                       nolabel="1" colspan="4"/>
+              </group>
+              <button name="action_preview_mark" type="object"
+                      string="预览唛头" class="oe_highlight"/>
+            </page>
+          </notebook>
+
+          <!-- 批量操作 -->
+          <group>
+            <button name="action_send_docs" type="object" string="一键发送邮件"
+                    class="oe_highlight" icon="fa-envelope"/>
+            <button name="action_doc_submit" type="object" string="标记已交单"
+                    invisible="doc_submit_stage == 'submitted'"/>
+          </group>
+        </page>
+      </xpath>
+    </field>
+  </record>
+</odoo>

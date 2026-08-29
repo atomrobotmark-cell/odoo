@@ -1,0 +1,104 @@
+<odoo>
+  <template id="report_commercial_invoice">
+    <t t-call="web.html_container">
+      <t t-foreach="docs" t-as="o">
+        <t t-call="web.external_layout">
+          <div class="page">
+            <div class="text-center"><h2>COMMERCIAL INVOICE</h2></div>
+
+            <t t-set="pay_map" t-value="{'lc':'L/C','tt':'T/T','dp':'D/P','da':'D/A','other':'其他'}"/>
+
+            <table class="table table-sm" style="margin-top:16px">
+              <tr>
+                <td style="width:50%">
+                  <strong>SELLER:</strong><br/>
+                  <t t-esc="o.company_id.name"/><br/>
+                  <t t-esc="o.company_id.partner_id.contact_address or ''"/>
+                </td>
+                <td>
+                  <strong>BUYER:</strong><br/>
+                  <t t-esc="o.partner_id.name"/><br/>
+                  <t t-esc="o.partner_id.contact_address or ''"/>
+                </td>
+              </tr>
+            </table>
+
+            <table class="table table-sm">
+              <tr>
+                <td><strong>Invoice No.:</strong> <t t-esc="o.name"/></td>
+                <td><strong>Date:</strong> <t t-esc="o.date_order"/></td>
+              </tr>
+              <tr>
+                <td><strong>Contract No.:</strong> <t t-esc="o.customs_contract_no or o.name"/></td>
+                <td><strong>Payment:</strong> <t t-esc="pay_map.get(o.doc_submit_method)"/></td>
+              </tr>
+              <tr>
+                <td><strong>Incoterms:</strong> <t t-esc="o.incoterm_id.name or ''"/></td>
+                <td><strong>Destination:</strong> <t t-esc="o.customs_dest_country or o.partner_id.country_id.name or ''"/></td>
+              </tr>
+            </table>
+
+            <table class="table table-sm table-bordered" style="margin-top:10px">
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>Description of Goods</th>
+                  <th>HS Code</th>
+                  <th class="text-right">Qty</th>
+                  <th>Unit</th>
+                  <th class="text-right">Unit Price</th>
+                  <th class="text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <t t-set="line_no" t-value="0"/>
+                <tr t-foreach="o.order_line" t-as="line">
+                  <t t-set="line_no" t-value="line_no + 1"/>
+                  <td><t t-esc="line_no"/></td>
+                  <td><t t-esc="line.name"/></td>
+                  <td><t t-esc="line.product_id.product_tmpl_id.hs_code or ''"/></td>
+                  <td class="text-right"><t t-esc="line.product_uom_qty"/></td>
+                  <td><t t-esc="line.product_uom_id.name or ''"/></td>
+                  <td class="text-right">
+                    <t t-esc="line.price_unit" t-options="{'widget':'monetary','display_currency':o.currency_id}"/>
+                  </td>
+                  <td class="text-right">
+                    <t t-esc="line.price_subtotal" t-options="{'widget':'monetary','display_currency':o.currency_id}"/>
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="6" class="text-right"><strong>Total:</strong></td>
+                  <td class="text-right">
+                    <strong>
+                      <t t-esc="o.amount_total" t-options="{'widget':'monetary','display_currency':o.currency_id}"/>
+                    </strong>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+
+            <p style="margin-top:20px"><strong>SHIPPING MARKS:</strong></p>
+            <pre style="white-space:pre-line"><t t-if="o.shipping_mark"><t t-esc="o.shipping_mark"/></t><t t-else=""><t t-esc="o.partner_id.name"/>
+PORT OF DESTINATION: <t t-esc="o.customs_dest_country or o.partner_id.country_id.name or ''"/>
+CONTRACT NO.: <t t-esc="o.customs_contract_no or o.name"/>
+C/NO. 1-UP
+MADE IN CHINA</t></pre>
+          </div>
+        </t>
+      </t>
+    </t>
+  </template>
+
+  <record id="action_report_commercial_invoice" model="ir.actions.report">
+    <field name="name">商业发票 Commercial Invoice</field>
+    <field name="model">sale.order</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">export_doc_tracker.report_commercial_invoice</field>
+    <field name="report_file">export_doc_tracker.report_commercial_invoice</field>
+    <field name="print_report_name">'CI_%s' % (object.name or '')</field>
+    <field name="binding_model_id" ref="sale.model_sale_order"/>
+    <field name="binding_type">report</field>
+  </record>
+</odoo>

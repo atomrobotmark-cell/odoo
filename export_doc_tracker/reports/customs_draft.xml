@@ -1,0 +1,128 @@
+<odoo>
+  <template id="report_customs_draft">
+    <t t-call="web.html_container">
+      <t t-foreach="docs" t-as="o">
+        <t t-call="web.external_layout">
+          <div class="page">
+            <h3 class="text-center">中华人民共和国海关出口货物报关单（草单）</h3>
+
+            <!-- 累加毛重/净重，供表头显示 -->
+            <t t-set="tg" t-value="0.0"/>
+            <t t-set="tn" t-value="0.0"/>
+            <t t-foreach="o.order_line" t-as="line">
+              <t t-set="tg" t-value="tg + (line.product_id.weight or 0.0) * 1.1 * line.product_uom_qty"/>
+              <t t-set="tn" t-value="tn + (line.product_id.weight or 0.0) * line.product_uom_qty"/>
+            </t>
+
+            <table class="table table-sm table-bordered">
+              <tr>
+                <td>境内发货人<br/><t t-esc="o.customs_consignor or o.company_id.name or ''"/></td>
+                <td>境外收货人<br/><t t-esc="o.partner_id.name or ''"/></td>
+                <td>运输方式<br/><t t-esc="o.customs_trans_mode or ''"/></td>
+                <td>监管方式<br/><t t-esc="o.customs_trade_mode or ''"/></td>
+              </tr>
+              <tr>
+                <td>贸易国(地区)<br/><t t-esc="o.partner_id.country_id.name or ''"/></td>
+                <td>运抵国(地区)<br/><t t-esc="o.customs_dest_country or o.partner_id.country_id.name or ''"/></td>
+                <td>指运港<br/><t t-esc="o.customs_port or ''"/></td>
+                <td>成交方式<br/><t t-esc="o.incoterm_id.name or ''"/></td>
+              </tr>
+              <tr>
+                <td>合同协议号<br/><t t-esc="o.customs_contract_no or o.name or ''"/></td>
+                <td>包装种类<br/><t t-esc="o.customs_package_type or ''"/></td>
+                <td>件数<br/><t t-esc="o.pl_total_packages or len(o.order_line)"/></td>
+                <td>毛重/净重(KGS)<br/>
+                  <t t-esc="o.pl_gross_weight or tg" t-options="{'widget':'float','precision':1}"/> /
+                  <t t-esc="o.pl_net_weight or tn" t-options="{'widget':'float','precision':1}"/>
+                </td>
+              </tr>
+              <tr>
+                <td>出口口岸<br/><t t-esc="o.customs_export_port or ''"/></td>
+                <td>备案号<br/><t t-esc="o.customs_filing_no or ''"/></td>
+                <td>出口日期<br/><t t-esc="o.customs_export_date or ''"/></td>
+                <td>申报日期<br/><t t-esc="o.customs_declaration_date or ''"/></td>
+              </tr>
+              <tr>
+                <td>运输工具名称<br/><t t-esc="o.customs_conveyance or ''"/></td>
+                <td>提运单号<br/><t t-esc="o.customs_bl_no or ''"/></td>
+                <td>许可证号<br/><t t-esc="o.customs_license_no or ''"/></td>
+                <td>结汇方式<br/><t t-esc="o.customs_settlement or ''"/></td>
+              </tr>
+              <tr>
+                <td>集装箱号<br/><t t-esc="o.customs_container_no or ''"/></td>
+                <td>随附单据<br/><t t-esc="o.customs_attached_docs or ''"/></td>
+                <td>生产厂家<br/><t t-esc="o.customs_manufacturer or ''"/></td>
+                <td>境内货源地<br/><t t-esc="o.customs_domestic_source or ''"/></td>
+              </tr>
+              <tr>
+                <td>运费<br/><t t-esc="o.customs_freight or ''"/></td>
+                <td>保费<br/><t t-esc="o.customs_insurance or ''"/></td>
+                <td>杂费<br/><t t-esc="o.customs_extras or ''"/></td>
+                <td>征免性质<br/><t t-esc="o.customs_levy_nature or ''"/></td>
+              </tr>
+              <tr>
+                <td>预录入编号<br/><t t-esc="o.customs_prelim_no or ''"/></td>
+                <td>海关编号<br/><t t-esc="o.customs_no or ''"/></td>
+                <td>批准文号<br/><t t-esc="o.customs_approval_no or ''"/></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td colspan="4">标记唛码及备注<br/>
+                  <t t-esc="o.customs_marks_remark or ''"/>
+                </td>
+              </tr>
+            </table>
+
+            <table class="table table-sm table-bordered" style="margin-top:8px">
+              <thead>
+                <tr>
+                  <th>项号</th>
+                  <th>商品编号(HS)</th>
+                  <th>商品名称及规格</th>
+                  <th>数量</th>
+                  <th>单位</th>
+                  <th>最终目的国(地区)</th>
+                  <th>单价</th>
+                  <th>总价</th>
+                  <th>币制</th>
+                  <th>征免</th>
+                </tr>
+              </thead>
+              <tbody>
+                <t t-set="i" t-value="0"/>
+                <tr t-foreach="o.order_line" t-as="line">
+                  <t t-set="i" t-value="i + 1"/>
+                  <td><t t-esc="i"/></td>
+                  <td><t t-esc="line.product_id.product_tmpl_id.hs_code or ''"/></td>
+                  <td><t t-esc="line.name"/></td>
+                  <td><t t-esc="line.product_uom_qty"/></td>
+                  <td><t t-esc="line.product_uom_id.name or ''"/></td>
+                  <td><t t-esc="o.customs_dest_country or o.partner_id.country_id.name or ''"/></td>
+                  <td><t t-esc="line.price_unit" t-options="{'widget':'monetary','display_currency':o.currency_id}"/></td>
+                  <td><t t-esc="line.price_subtotal" t-options="{'widget':'monetary','display_currency':o.currency_id}"/></td>
+                  <td><t t-esc="o.currency_id.name or ''"/></td>
+                  <td>照章征税</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <p style="margin-top:20px;color:#888;font-size:11px">
+              注：本草单由系统依据销售订单及「填制单证」页填写内容生成，供报关录入参考，正式报关请以海关规定为准。
+            </p>
+            </div>
+        </t>
+      </t>
+    </t>
+  </template>
+
+  <record id="action_report_customs_draft" model="ir.actions.report">
+    <field name="name">报关单草单 Customs Draft</field>
+    <field name="model">sale.order</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">export_doc_tracker.report_customs_draft</field>
+    <field name="report_file">export_doc_tracker.report_customs_draft</field>
+    <field name="print_report_name">'CUSTOMS_%s' % (object.name or '')</field>
+    <field name="binding_model_id" ref="sale.model_sale_order"/>
+    <field name="binding_type">report</field>
+  </record>
+</odoo>

@@ -1,0 +1,76 @@
+<odoo>
+  <record id="action_export_doc_fill_wizard" model="ir.actions.act_window">
+    <field name="name">填制装箱单 / 报关草单</field>
+    <field name="res_model">export.doc.fill.wizard</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+    <field name="binding_model_id" ref="sale.model_sale_order"/>
+    <field name="binding_type">action</field>
+    <field name="context">{'default_sale_order_id': active_id}</field>
+  </record>
+
+  <record id="view_export_doc_fill_wizard" model="ir.ui.view">
+    <field name="name">export.doc.fill.wizard.form</field>
+    <field name="model">export.doc.fill.wizard</field>
+    <field name="arch" type="xml">
+      <form string="填制装箱单 / 报关草单">
+        <group string="报关草单（表头信息）" colspan="4">
+          <group>
+            <field name="incoterm_id"/>
+            <field name="customs_trans_mode"/>
+            <field name="customs_trade_mode"/>
+            <field name="customs_dest_country"/>
+            <field name="customs_port"/>
+            <field name="customs_contract_no"/>
+            <field name="customs_package_type"/>
+            <field name="customs_consignor"/>
+          </group>
+          <group>
+            <field name="customs_prelim_no"/>
+            <field name="customs_no"/>
+            <field name="customs_export_port"/>
+            <field name="customs_filing_no"/>
+            <field name="customs_export_date"/>
+            <field name="customs_declaration_date"/>
+            <field name="customs_settlement"/>
+            <field name="customs_levy_nature"/>
+          </group>
+        </group>
+        <group string="运输与单证" colspan="4">
+          <group>
+            <field name="customs_conveyance"/>
+            <field name="customs_bl_no"/>
+            <field name="customs_license_no"/>
+            <field name="customs_approval_no"/>
+            <field name="customs_container_no"/>
+            <field name="customs_attached_docs"/>
+          </group>
+          <group>
+            <field name="customs_domestic_source"/>
+            <field name="customs_manufacturer"/>
+            <field name="customs_freight"/>
+            <field name="customs_insurance"/>
+            <field name="customs_extras"/>
+          </group>
+        </group>
+        <group string="装箱单（箱级数据，留空则按产品重量自动估算）" colspan="4">
+          <group>
+            <field name="pl_total_packages"/>
+            <field name="pl_gross_weight"/>
+            <field name="pl_net_weight"/>
+            <field name="pl_volume"/>
+          </group>
+        </group>
+        <group string="标记唛码及备注" colspan="4">
+          <field name="customs_marks_remark" nolabel="1"/>
+        </group>
+        <footer>
+          <button name="action_preview_packing" type="object" string="保存并预览装箱单"
+                  class="btn-primary"/>
+          <button name="action_preview_customs" type="object" string="保存并预览报关草单"/>
+          <button special="cancel" string="取消" class="btn-secondary"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+</odoo>

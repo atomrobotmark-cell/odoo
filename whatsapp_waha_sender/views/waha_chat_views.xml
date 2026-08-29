@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Contact (res.partner): chat of this contact; if company, one tab per contact -->
+    <record id="res_partner_view_form_waha_chat" model="ir.ui.view">
+        <field name="name">res.partner.form.waha.chat</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook[1]" position="inside">
+                <page string="WhatsApp Chat" name="waha_chat">
+                    <field name="waha_chat_html" widget="html" nolabel="1" readonly="1"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- CRM Lead -->
+    <record id="crm_lead_view_form_waha_chat" model="ir.ui.view">
+        <field name="name">crm.lead.form.waha.chat</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook[1]" position="inside">
+                <page string="WhatsApp Chat" name="waha_chat">
+                    <field name="waha_chat_html" widget="html" nolabel="1" readonly="1"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Sales Order -->
+    <record id="sale_order_view_form_waha_chat" model="ir.ui.view">
+        <field name="name">sale.order.form.waha.chat</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook[1]" position="inside">
+                <page string="WhatsApp Chat" name="waha_chat">
+                    <field name="waha_chat_html" widget="html" nolabel="1" readonly="1"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Invoice (account.move) -->
+    <record id="account_move_view_form_waha_chat" model="ir.ui.view">
+        <field name="name">account.move.form.waha.chat</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook[1]" position="inside">
+                <page string="WhatsApp Chat" name="waha_chat">
+                    <field name="waha_chat_html" widget="html" nolabel="1" readonly="1"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,86 @@
+<odoo>
+  <template id="report_packing_list">
+    <t t-call="web.html_container">
+      <t t-foreach="docs" t-as="o">
+        <t t-call="web.external_layout">
+          <div class="page">
+            <div class="text-center"><h2>PACKING LIST</h2></div>
+
+            <table class="table table-sm" style="margin-top:16px">
+              <tr>
+                <td><strong>Invoice No.:</strong> <t t-esc="o.name"/></td>
+                <td><strong>Date:</strong> <t t-esc="o.date_order"/></td>
+                <td><strong>Buyer:</strong> <t t-esc="o.partner_id.name"/></td>
+              </tr>
+              <tr>
+                <td colspan="3">
+                  <strong>Destination:</strong>
+                  <t t-esc="o.customs_dest_country or o.partner_id.country_id.name or ''"/>
+                </td>
+              </tr>
+            </table>
+
+            <table class="table table-sm table-bordered" style="margin-top:10px">
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>Description</th>
+                  <th class="text-right">Qty</th>
+                  <th class="text-right">Net Weight (KGS)</th>
+                  <th class="text-right">Gross Weight (KGS)</th>
+                  <th class="text-right">Volume (CBM)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <t t-set="n" t-value="0"/>
+                <t t-set="tn" t-value="0.0"/>
+                <t t-set="tg" t-value="0.0"/>
+                <t t-set="tv" t-value="0.0"/>
+                <tr t-foreach="o.order_line" t-as="line">
+                  <t t-set="n" t-value="n + 1"/>
+                  <t t-set="w" t-value="line.product_id.weight or 0.0"/>
+                  <t t-set="v" t-value="line.product_id.volume or 0.0"/>
+                  <t t-set="net" t-value="w * line.product_uom_qty"/>
+                  <t t-set="gross" t-value="net * 1.1"/>
+                  <t t-set="tn" t-value="tn + net"/>
+                  <t t-set="tg" t-value="tg + gross"/>
+                  <t t-set="tv" t-value="tv + v * line.product_uom_qty"/>
+                  <td><t t-esc="n"/></td>
+                  <td><t t-esc="line.name"/></td>
+                  <td class="text-right"><t t-esc="line.product_uom_qty"/></td>
+                  <td class="text-right"><t t-esc="net" t-options="{'widget':'float','precision':2}"/></td>
+                  <td class="text-right"><t t-esc="gross" t-options="{'widget':'float','precision':2}"/></td>
+                  <td class="text-right"><t t-esc="v * line.product_uom_qty" t-options="{'widget':'float','precision':3}"/></td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3" class="text-right"><strong>TOTAL</strong></td>
+                  <td class="text-right"><strong><t t-esc="o.pl_net_weight or tn" t-options="{'widget':'float','precision':2}"/></strong></td>
+                  <td class="text-right"><strong><t t-esc="o.pl_gross_weight or tg" t-options="{'widget':'float','precision':2}"/></strong></td>
+                  <td class="text-right"><strong><t t-esc="o.pl_volume or tv" t-options="{'widget':'float','precision':3}"/></strong></td>
+                </tr>
+              </tfoot>
+            </table>
+
+            <p style="margin-top:10px">
+              Total Packages: <t t-esc="o.pl_total_packages or len(o.order_line)"/>
+              &#160;|&#160; Package Type: <t t-esc="o.customs_package_type or 'CARTON'"/>
+            </p>
+          </div>
+        </t>
+      </t>
+    </t>
+  </template>
+
+  <record id="action_report_packing_list" model="ir.actions.report">
+    <field name="name">装箱单 Packing List</field>
+    <field name="model">sale.order</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">export_doc_tracker.report_packing_list</field>
+    <field name="report_file">export_doc_tracker.report_packing_list</field>
+    <field name="print_report_name">'PL_%s' % (object.name or '')</field>
+    <field name="binding_model_id" ref="sale.model_sale_order"/>
+    <field name="binding_type">report</field>
+  </record>
+</odoo>
