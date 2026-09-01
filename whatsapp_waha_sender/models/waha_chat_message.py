@@ -32,11 +32,9 @@ class WahaChatMessage(models.Model):
     media_type = fields.Char(string='Media Type')
     media_url = fields.Char(string='Media URL')
     msg_timestamp = fields.Datetime(string='WhatsApp Time')
+    attachment_id = fields.Many2one("ir.attachment", string="Media Attachment", ondelete="set null")
     fetched_at = fields.Datetime(string='Fetched At', default=fields.Datetime.now)
 
-    _constraints = [
-        models.UniqueIndex(('account_id', 'wa_msg_id')),
-    ]
 
     @api.model
     def upsert_from_waha(self, account, partner, chat_id, messages):

@@ -40,9 +40,6 @@ h3 { margin: 0 0 8px; font-size: 15px; }
 
 class WahaChatController(http.Controller):
 
-    # ----------------------------------------------------------
-    # Helpers
-    # ----------------------------------------------------------
     def _account(self):
         return request.env['waha.account'].sudo().search([('active', '=', True)], limit=1)
 
@@ -57,7 +54,7 @@ class WahaChatController(http.Controller):
     def _messages_html(self, contact):
         rows = request.env['waha.chat.message'].search([
             ('partner_id', '=', contact.id),
-        ], limit=300, order='msg_timestamp asc')
+        ], limit=500, order='msg_timestamp asc')
         if not rows:
             return '<div class="empty">No messages cached. Click "Sync" to pull ' \
                    'history from WAHA.</div>'
@@ -68,7 +65,6 @@ class WahaChatController(http.Controller):
             body = html.escape(m.body or '', quote=True)
             media_html = ''
             if m.media_url:
-                # Convert WAHA URL to proxy URL
                 proxy_url = m.media_url
                 if '/api/files/' in proxy_url:
                     file_part = proxy_url.split('/api/files/', 1)[1]
@@ -112,7 +108,7 @@ class WahaChatController(http.Controller):
             cid = c.id
             phone = c.phone or '(no phone)'
             active = ' active' if idx == 0 else ''
-            disabled = '' if (c.phone) else ' disabled'
+            disabled = '' if (c.phone or c.name) else ' disabled'
             tabs.append(
                 '<div class="tab%s" data-tab="%s" onclick="wahaShow(%s)">%s</div>'
                 % (active, cid, cid, html.escape(c.name or c.display_name)))
@@ -168,7 +164,6 @@ class WahaChatController(http.Controller):
             return r.json();
         })
         .then(function(raw){
-            // jsonrpc wraps result in {jsonrpc, id, result: {...}}
             var d = raw && raw.result ? raw.result : raw;
             if(st){st.textContent=d.ok?('Synced ('+d.count+')'):('Error: '+(d.error||'unknown'));}
             if(d.ok){setTimeout(function(){location.reload();},600);}
@@ -181,9 +176,6 @@ class WahaChatController(http.Controller):
     }
     """
 
-    # ----------------------------------------------------------
-    # Routes
-    # ----------------------------------------------------------
     @http.route('/waha/chat/partner/<int:partner_id>', auth='user',
                 type='http', csrf=False, website=False)
     def chat_partner(self, partner_id, **kw):
@@ -201,7 +193,6 @@ class WahaChatController(http.Controller):
     @http.route('/waha/sync/partner/<int:partner_id>', auth='none',
                 type='jsonrpc', csrf=False, website=False)
     def sync_partner(self, partner_id, **kw):
-        # auth='none' allows iframe requests (same-origin, Odoo session cookie present)
         partner = request.env['res.partner'].sudo().browse(partner_id).exists()
         if not partner:
             return {'ok': False, 'error': 'Partner not found'}
@@ -217,18 +208,15 @@ class WahaChatController(http.Controller):
     @http.route('/waha/file/<path:file_path>', auth='none',
                 type='http', csrf=False, website=False)
     def proxy_file(self, file_path, **kw):
-        """Proxy WAHA file requests so iframe can load images/videos/PDFs."""
         account = self._account()
         if not account:
             return request.make_response('No WAHA account', status=404)
-        # Build the full WAHA URL
         base = account.base_url.rstrip('/')
         url = '%s/api/files/%s' % (base, file_path)
         api_key = account.api_key or ''
         try:
             req = urllib.request.Request(url)
             req.add_header('X-Api-Key', api_key)
-            # Disable proxy for internal request
             opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
             resp = opener.open(req, timeout=30)
             content = resp.read()
