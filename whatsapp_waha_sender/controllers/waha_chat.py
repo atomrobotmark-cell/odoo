@@ -71,15 +71,16 @@ class WahaChatController(http.Controller):
                     proxy_url = '/waha/file/%s' % file_part
                 mt = (m.media_type or '').lower()
                 if mt in ('image', 'photo', 'jpeg', 'png', 'gif', 'webp'):
-                    media_html = '<div class="media"><img src="%s" style="max-width:100%%;border-radius:8px;" loading="lazy"/></div>' % html.escape(proxy_url)
+                    media_html = '<div class="media"><img src="%s" style="max-width:100%%;border-radius:8px;"/></div>' % html.escape(proxy_url + '?v=' + str(int(m.msg_timestamp.timestamp()) if m.msg_timestamp else 0))
                 elif mt in ('video',):
-                    media_html = '<div class="media"><video src="%s" controls preload="metadata" style="max-width:100%%;border-radius:8px;max-height:400px;"></video></div>' % html.escape(proxy_url)
+                    media_html = '<div class="media"><video src="%s" controls preload="metadata" style="max-width:100%%;border-radius:8px;max-height:400px;"></video></div>' % html.escape(proxy_url + '?v=' + str(int(m.msg_timestamp.timestamp()) if m.msg_timestamp else 0))
                 elif mt in ('audio', 'ptt', 'audio/ogg', 'audio/mpeg'):
-                    media_html = '<div class="media"><audio src="%s" controls style="width:100%%;"></audio></div>' % html.escape(proxy_url)
+                    media_html = '<div class="media"><audio src="%s" controls style="width:100%%;"></audio></div>' % html.escape(proxy_url + '?v=' + str(int(m.msg_timestamp.timestamp()) if m.msg_timestamp else 0))
                 elif mt in ('document', 'pdf', 'application/pdf'):
                     media_html = '<div class="media"><iframe src="%s" style="width:100%%;height:400px;border:1px solid #ccc;border-radius:8px;"></iframe></div>' % html.escape(proxy_url)
                 else:
-                    media_html = '<div class="media"><a href="%s" target="_blank" style="color:#25d366;">📎 Attachment (%s)</a></div>' % (html.escape(proxy_url), html.escape(mt or 'file'))
+                    # Generic download button for any file type
+                    media_html = '<div class="media"><a href="%s" target="_blank" style="color:#25d366;display:inline-flex;align-items:center;gap:6px;padding:8px 12px;background:#f0f2f5;border-radius:8px;text-decoration:none;"><span style="font-size:20px;">📄</span> %s</a></div>' % (html.escape(proxy_url), html.escape(m.body or 'Download'))
             content = media_html + ('<div class="text">%s</div>' % body if body else '')
             if not content:
                 content = '<div class="text" style="color:#9ca3af;">[media message]</div>'
@@ -188,7 +189,10 @@ class WahaChatController(http.Controller):
         contacts = self._contacts_for(partner)
         html_doc = self._render_html(partner, account, contacts)
         return request.make_response(
-            html_doc, headers=[('Content-Type', 'text/html; charset=utf-8')])
+            html_doc, headers=[
+                ('Content-Type', 'text/html; charset=utf-8'),
+                ('Content-Security-Policy', "default-src 'self' 'unsafe-inline' data: blob:; img-src 'self' http://192.168.18.89:3000 https://odoo.chenxingautomation.cn data: blob:; font-src 'self' data:;"),
+            ])
 
     @http.route('/waha/sync/partner/<int:partner_id>', auth='none',
                 type='jsonrpc', csrf=False, website=False)
@@ -226,7 +230,9 @@ class WahaChatController(http.Controller):
                 headers=[
                     ('Content-Type', content_type),
                     ('Content-Length', len(content)),
-                    ('Cache-Control', 'public, max-age=3600'),
+                    ('Cache-Control', 'no-cache, no-store, must-revalidate'),
+                    ('Pragma', 'no-cache'),
+                    ('Content-Security-Policy', "default-src 'self' 'unsafe-inline' data: blob:; img-src 'self' http://192.168.18.89:3000 data: blob:;"),
                 ])
         except urllib.error.HTTPError as e:
             return request.make_response('File not found', status=e.code)
